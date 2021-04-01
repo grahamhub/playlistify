@@ -28,3 +28,45 @@ A Discord bot to help manage the Launch School music club so that as leadership 
                     └────────────────────┘
 ```
 
+### Spotify Classes / Flow
+
+```
+               ┌───────────────────────────┐
+               │           DB              │
+               │                           │
+               │ getCurrent()              │
+               │                           │
+               │ setWeekly(playlistId)     │
+┌─────────────►│                           ├────────────┐
+│              │ setFresh(playlistId)      │            │
+│              │                           │            │
+│              │ setUser(userId)           │            │
+│              │                           │            │
+│              │ getToken()                │            │
+│              │                           │            │
+│              │ setToken(refreshedToken)  │            │
+│              └───────────────────────────┘            │
+│                                                       │
+│              ┌───────────────────────────┐            │
+│              │      PlaylistManager      │            │
+│              │                           │            │
+└──────────────┤                           │            │
+               │ create()                  │            │
+┌──────────────┤                           │◄───────────┤
+│              │ updateCurrent(details)    │            │
+│              │                           │            │
+│              │ addToCurrent(songUrl)     │            │
+│              └───────────────────────────┘            │
+│                                                       │
+│              ┌───────────────────────────┐            │
+│              │             API           │            │
+│              │                           │            │
+│              │ baseURI                   │            │
+│              │                           │            │
+│              │ get(endpoint)             │            │
+└─────────────►│                           ├────────────┘
+               │ post(endpoint, body)      │
+               │                           │
+               │ encode(body)              │
+               └───────────────────────────┘
+```

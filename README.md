@@ -1,4 +1,4 @@
-# LS Music Club Discord Bot (Mr. Roboto)
+# LS Music Club Discord Bot (playlistify)
 
 A Discord bot to help manage the Launch School music club so that as leadership changes it will still be accessible and manageable.
 
@@ -11,7 +11,7 @@ A Discord bot to help manage the Launch School music club so that as leadership 
                Refresh            Process
 ┌─────────────┐      ┌────────────┐     ┌─────────────┐
 │             │◄─────┤            ├────►│             │
-│ Spotify API │      │ Mr. Roboto │     │ Discord API │
+│ Spotify API │      │playlistify │     │ Discord API │
 │             ├─────►│            │◄────┤             │
 └─────┬───────┘      └──────┬─────┘     └──────┬──────┘
       │                     │                  │
@@ -69,4 +69,36 @@ A Discord bot to help manage the Launch School music club so that as leadership 
                │                           │
                │ encode(body)              │
                └───────────────────────────┘
+```
+
+### Discord Classes / Flow
+
+```
+         ┌───────────────────────────┐
+┌───────►│     PlaylistManager       ├────────┐
+│        └───────────────────────────┘        │
+│                                             │
+│        ┌───────────────────────────┐        │
+│        │           Client          │        │
+│        │                           │        │
+├────────┤ handleMessage()           │◄───────┤
+│        │                           │        │
+│        │ respond()                 │        │
+│        └───────────────────────────┘        │
+│                                             │
+│        ┌───────────────────────────┐        │
+│        │         Messenger         │        │
+│        │                           │        │
+│        │ parseCommand(message)     │        │
+│        │                           │        │
+│        │ sendSuccess()             │        │
+└───────►│                           │        │
+         │ sendError()               ├────────┘
+         │                           │
+         │ sendHelp()                │
+         │                           │
+         │ sendWeekly()              │
+         │                           │
+         │ sendFresh()               │
+         └───────────────────────────┘
 ```

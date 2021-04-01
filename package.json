@@ -1,0 +1,25 @@
+{
+  "name": "playlistify",
+  "version": "1.0.0",
+  "description": "A Discord bot for managing Spotify playlists",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grahamhub/playlistify.git"
+  },
+  "author": "grahamhub",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grahamhub/playlistify/issues"
+  },
+  "homepage": "https://github.com/grahamhub/playlistify#readme",
+  "devDependencies": {
+    "mocha": "^8.3.2"
+  },
+  "dependencies": {
+    "discord.js": "^12.5.2"
+  }
+}

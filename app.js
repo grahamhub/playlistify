@@ -36,13 +36,20 @@ client.on('message', (message) => {
       client.messenger.sendHelp();
       break;
     case 'weekly':
-      if (cmd.args) addSong(cmd.args[0]);
+      if (cmd.args) {
+        addSong(cmd.args[0]);
+      } else {
+        getPlaylist(cmd.command);
+      }
       break;
     case 'fresh':
-      if (cmd.args) addSong(cmd.args[0], true);
+      if (cmd.args) {
+        addSong(cmd.args[0], true);
+      } else {
+        getPlaylist(cmd.command);
+      }
       break;
     default:
-      getPlaylist(cmd.command);
       break;
   }
 });

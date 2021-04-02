@@ -1,6 +1,8 @@
+const Database = require('./db/database');
 const Client = require('./discord/client');
 const PlaylistManager = require('./spotify/playlistmgr');
 
+const db = new Database();
 const client = new Client();
 const playlists = new PlaylistManager();
 
@@ -16,6 +18,14 @@ const addSong = async function addSongToPlaylist(url, isFresh = false) {
   }
 };
 
+const getPlaylist = function getCurrentPlaylist(type) {
+  let playlist = db.getCurrent()[type];
+
+  if (!playlist) playlist = 'Could not fetch playlist';
+
+  client.messenger.send(playlist);
+};
+
 client.on('message', (message) => {
   const cmd = client.parseCommand(message);
 
@@ -26,12 +36,13 @@ client.on('message', (message) => {
       client.messenger.sendHelp();
       break;
     case 'weekly':
-      addSong(cmd.args[0]);
+      if (cmd.args) addSong(cmd.args[0]);
       break;
     case 'fresh':
-      addSong(cmd.args[0], true);
+      if (cmd.args) addSong(cmd.args[0], true);
       break;
     default:
+      getPlaylist(cmd.command);
       break;
   }
 });

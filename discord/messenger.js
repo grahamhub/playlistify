@@ -32,16 +32,8 @@ To get a proper URL:
     this.channel.send(error);
   }
 
-  sendWeekly() {
-    const weekly = 'placeholder';
-
-    this.channel.send(weekly);
-  }
-
-  sendFresh() {
-    const fresh = 'placeholder';
-
-    this.channel.send(fresh);
+  send(msg) {
+    this.channel.send(msg);
   }
 }
 

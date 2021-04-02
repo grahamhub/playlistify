@@ -2,7 +2,7 @@
   "name": "playlistify",
   "version": "1.0.0",
   "description": "A Discord bot for managing Spotify playlists",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "mocha"
   },
@@ -20,6 +20,8 @@
     "mocha": "^8.3.2"
   },
   "dependencies": {
-    "discord.js": "^12.5.2"
+    "discord.js": "^12.5.2",
+    "dotenv": "^8.2.0",
+    "sqlite3": "^5.0.2"
   }
 }

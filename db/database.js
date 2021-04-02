@@ -8,11 +8,7 @@ class Database {
       'CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, token)',
     );
 
-    this.initCurrent();
-  }
-
-  static handleErr(err) {
-    if (err) logger.log(err, 'Database');
+    this.initialized = this.initCurrent();
   }
 
   static updateSql(col) {
@@ -20,9 +16,18 @@ class Database {
   }
 
   exec(col, val) {
-    this.getCurrent((current) => {
-      this.db.run(this.updateSql(col), [val, current.user], this.handleErr);
+    const previous = this.getCurrent();
+    let changes;
+
+    this.db.run(this.updateSql(col), [val, previous.user], (err) => {
+      if (err) {
+        logger.log(err, 'Database');
+      } else {
+        changes = this.changes;
+      }
     });
+
+    return !!changes;
   }
 
   initCurrent() {
@@ -32,13 +37,22 @@ class Database {
     const weekly = "''";
     const fresh = "''";
     const token = `'${process.env.SPOTIFY_CLIENT_SECRET}'`;
+    let initialized = isEmpty;
 
     if (isEmpty) {
       this.db.run(
         `INSERT INTO current (user, weekly, fresh, token) VALUES (${user}, ${weekly}, ${fresh}, ${token})`,
-        this.handleErr,
+        (err) => {
+          if (err) {
+            logger.log(err, 'Database');
+          } else {
+            initialized = true;
+          }
+        },
       );
     }
+
+    return initialized;
   }
 
   getCurrent() {
@@ -56,19 +70,19 @@ class Database {
   }
 
   setWeekly(playlistId) {
-    this.exec('weekly', playlistId);
+    return this.exec('weekly', playlistId);
   }
 
   setFresh(playlistId) {
-    this.exec('fresh', playlistId);
+    return this.exec('fresh', playlistId);
   }
 
   setUser(userId) {
-    this.exec('user', userId);
+    return this.exec('user', userId);
   }
 
   setToken(refreshedToken) {
-    this.exec('token', refreshedToken);
+    return this.exec('token', refreshedToken);
   }
 }
 

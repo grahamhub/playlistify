@@ -1,57 +1,75 @@
 const sqlite3 = require('sqlite3').verbose();
+const logger = require('../exceptions/logger');
 
 class Database {
-  constructor() {
-    this.db = new sqlite3.Database(process.env.DATABASE);
-    this.db.run('CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, token)');
-    this._initCurrent();
+  constructor(dbName = process.env.DATABASE) {
+    this.db = new sqlite3.Database(dbName);
+    this.db.run(
+      'CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, token)',
+    );
+
+    this.initCurrent();
   }
 
-  _handleErr(err) {
-    if (err) console.log(err);
+  static handleErr(err) {
+    if (err) logger.log(err, 'Database');
   }
 
-  _updateSql(col) {
+  static updateSql(col) {
     return `UPDATE CURRENT SET ${col} = ? WHERE user = ?`;
   }
 
-  _exec(col, val) {
+  exec(col, val) {
     this.getCurrent((current) => {
-      this.db.run(this.updateSql(col), [val, current.user], this._handleErr);
+      this.db.run(this.updateSql(col), [val, current.user], this.handleErr);
     });
   }
 
-  _initCurrent() {
-    this.getCurrent((current) => {
-      if (current === undefined) {
-        this.db.run(`INSERT INTO current (user, weekly, fresh, token) VALUES ('user', '', '', '')`, this._handleErr);
-      }
-    });
+  initCurrent() {
+    const current = this.getCurrent();
+    const isEmpty = Object.keys(current).length === 0;
+    const user = `'${process.env.SPOTIFY_CLIENT_ID}'`;
+    const weekly = "''";
+    const fresh = "''";
+    const token = `'${process.env.SPOTIFY_CLIENT_SECRET}'`;
+
+    if (isEmpty) {
+      this.db.run(
+        `INSERT INTO current (user, weekly, fresh, token) VALUES (${user}, ${weekly}, ${fresh}, ${token})`,
+        this.handleErr,
+      );
+    }
   }
 
-  getCurrent(callback) {
+  getCurrent() {
+    let current;
+
     this.db.get('SELECT * FROM current', (err, row) => {
       if (err) {
-        console.log(err);
+        logger.log(err, 'Database');
       } else {
-        callback(row);
+        current = row;
       }
     });
+
+    return current || {};
   }
 
   setWeekly(playlistId) {
-    this._exec('weekly', playlistId);
+    this.exec('weekly', playlistId);
   }
 
   setFresh(playlistId) {
-    this._exec('fresh', playlistId);
+    this.exec('fresh', playlistId);
   }
 
   setUser(userId) {
-    this._exec('user', userId);
+    this.exec('user', userId);
   }
 
   setToken(refreshedToken) {
-    this._exec('token', refreshedToken);
+    this.exec('token', refreshedToken);
   }
 }
+
+module.exports = Database;

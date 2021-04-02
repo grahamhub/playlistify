@@ -3,28 +3,6 @@ class Messenger {
     this.channel = channel;
   }
 
-  routeMessage(type) {
-    switch (type) {
-      case 'help':
-        this.sendHelp();
-        break;
-      case 'success':
-        this.sendSuccess();
-        break;
-      case 'error':
-        this.sendError();
-        break;
-      case 'weekly':
-        this.sendWeekly();
-        break;
-      case 'fresh':
-        this.sendFresh();
-        break;
-      default:
-        break;
-    }
-  }
-
   sendHelp() {
     const help = `Command structure:
 - !<command> <url>
@@ -32,6 +10,7 @@ class Messenger {
 Available commands:
 - weekly: accepts album or track URLs (or no argument for the link)
 - fresh: accepts only track URLs (or no argument for the link)
+- help: responds with this message \u{1f917}
 
 To get a proper URL:
 - Open your Spotify client
@@ -47,8 +26,8 @@ To get a proper URL:
     this.channel.send(success);
   }
 
-  sendError() {
-    const error = 'I ran into an error!';
+  sendError(message) {
+    const error = `I ran into an error: ${message}`;
 
     this.channel.send(error);
   }

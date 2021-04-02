@@ -18,7 +18,7 @@ class Client extends Discord.Client {
   static buildCommand(content) {
     const contArr = content.split(' ');
 
-    const command = contArr.shift();
+    const command = contArr.shift().slice(1);
     const args = [...contArr];
 
     return {

@@ -35,7 +35,7 @@ class Database {
   }
 
   static updateSql(col) {
-    return `UPDATE current SET ${col} = ? WHERE user = ?`;
+    return `UPDATE current SET ${col} = ? WHERE rowid = 1`;
   }
 
   clear() {
@@ -62,28 +62,23 @@ class Database {
   }
 
   async setWeekly(playlistId) {
-    const current = await this.getCurrent();
-    return this.run(Database.updateSql('weekly'), [playlistId, current.user]);
+    return this.run(Database.updateSql('weekly'), [playlistId]);
   }
 
   async setFresh(playlistId) {
-    const current = await this.getCurrent();
-    return this.run(Database.updateSql('fresh'), [playlistId, current.user]);
+    return this.run(Database.updateSql('fresh'), [playlistId]);
   }
 
   async setUser(userId) {
-    const current = await this.getCurrent();
-    return this.run(Database.updateSql('user'), [userId, current.user]);
+    return this.run(Database.updateSql('user'), [userId]);
   }
 
   async setRefresh(token) {
-    const current = await this.getCurrent();
-    return this.run(Database.updateSql('refresh_token'), [token, current.user]);
+    return this.run(Database.updateSql('refresh_token'), [token]);
   }
 
   async setAccess(token) {
-    const current = await this.getCurrent();
-    return this.run(Database.updateSql('access_token'), [token, current.user]);
+    return this.run(Database.updateSql('access_token'), [token]);
   }
 }
 

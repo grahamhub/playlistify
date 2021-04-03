@@ -11,22 +11,25 @@ const Database = require('../db/database');
 const app = express();
 const db = new Database();
 
-const authFlow = function authorizationFlow(code, res) {
-  const parseUser = (payload) => payload.id;
+const jsonify = function jsonifyResponse(res) {
+  return res.json();
+};
 
-  API.authorize(code, (response) => response.json()).then((data) => {
-    API.get('/me', data.access_token, parseUser).then(async (user) => {
-      const updatedUser = await db.setUser(user);
-      const updatedTokens = await db.setTokens(
-        data.refresh_token,
-        data.access_token,
-      );
-      console.log(updatedTokens);
-      if (!updatedUser || !updatedTokens) {
-        res.send('Unable to update database');
-      } else {
-        res.send('Successfully updated database');
-      }
+const authFlow = function authorizationFlow(code, res) {
+  const parseUser = async (payload) => {
+    const user = await jsonify(payload);
+
+    return user.id;
+  };
+
+  API.authorize(code, jsonify).then((data) => {
+    API.get('me', data.access_token, parseUser).then(async (user) => {
+      await db.setUser(user);
+      await db.setAccess(data.access_token);
+      await db.setRefresh(data.refresh_token);
+      const current = await db.getCurrent();
+
+      res.send(`Database updated for ${current.user}`);
     });
   });
 };

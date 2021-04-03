@@ -14,7 +14,7 @@ class Logger {
       content += `${key}: ${err[key]}\n`;
     });
 
-    fs.writeFile(file, content);
+    fs.writeFile(file, content, { flag: 'w' });
   }
 }
 

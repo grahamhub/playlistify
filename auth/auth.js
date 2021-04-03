@@ -15,10 +15,13 @@ const authFlow = function authorizationFlow(code, res) {
   const parseUser = (payload) => payload.id;
 
   API.authorize(code, (response) => response.json()).then((data) => {
-    API.get('/me', data.access_token, parseUser).then((user) => {
-      const updatedUser = db.setUser(user);
-      const updatedTokens = db.setTokens(data.refresh_token, data.access_token);
-
+    API.get('/me', data.access_token, parseUser).then(async (user) => {
+      const updatedUser = await db.setUser(user);
+      const updatedTokens = await db.setTokens(
+        data.refresh_token,
+        data.access_token,
+      );
+      console.log(updatedTokens);
       if (!updatedUser || !updatedTokens) {
         res.send('Unable to update database');
       } else {

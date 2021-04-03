@@ -105,3 +105,6 @@ dist
 
 # PEDAC
 pedac
+
+#db
+db/*

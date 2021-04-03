@@ -2,7 +2,7 @@ const fs = require('fs');
 
 class Logger {
   constructor() {
-    this.path = '/exceptions/logs';
+    this.path = './logs';
   }
 
   log(err, className) {

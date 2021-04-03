@@ -3,9 +3,7 @@ const Database = require('../db/database');
 
 class PlaylistManager {
   constructor() {
-    this.api = new API();
     this.db = new Database();
-    this.appToken = process.env.SPOTIFYCLIENTSECRET;
   }
 
   static parse(res) {
@@ -29,9 +27,7 @@ class PlaylistManager {
   getSongsFromAlbum(url) {
     const endpoint = `albums/${this.extractID(url)}/tracks`;
 
-    return this.api
-      .get(endpoint, this.appToken, this.parse)
-      .then(this.extractURIs);
+    return API.get(endpoint, this.appToken, this.parse).then(this.extractURIs);
   }
 
   getSongURI(url) {
@@ -65,10 +61,10 @@ class PlaylistManager {
         : `LS Weekly Meeting playlist for ${day}`,
     };
 
-    const playlist = await this.api.post(
+    const playlist = await API.post(
       endpoint,
       body,
-      current.token,
+      current.access_token,
       this.parse,
     );
 
@@ -79,10 +75,10 @@ class PlaylistManager {
     const current = this.db.getCurrent();
     const playlist = fresh ? current.fresh : current.weekly;
 
-    const status = await this.api.put(
+    const status = await API.put(
       `playlists/${playlist}`,
       details,
-      current.token,
+      current.access_token,
       this.parse,
     );
 
@@ -98,10 +94,10 @@ class PlaylistManager {
       uris: songs,
     };
 
-    const snapshot = await this.api.post(
+    const snapshot = await API.post(
       endpoint,
       body,
-      current.token,
+      current.access_token,
       this.parse,
     );
 

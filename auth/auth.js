@@ -6,15 +6,35 @@ const express = require('express');
 const cors = require('cors');
 const querystring = require('querystring');
 const API = require('../spotify/api');
+const Database = require('../db/database');
 
 const app = express();
+const db = new Database();
+
+const authFlow = function authorizationFlow(code, res) {
+  const parseUser = (payload) => payload.id;
+
+  API.authorize(code, (response) => response.json()).then((data) => {
+    API.get('/me', data.access_token, parseUser).then((user) => {
+      const updatedUser = db.setUser(user);
+      const updatedTokens = db.setTokens(data.refresh_token, data.access_token);
+
+      if (!updatedUser || !updatedTokens) {
+        res.send('Unable to update database');
+      } else {
+        res.send('Successfully updated database');
+      }
+    });
+  });
+};
 
 app.use(express.static(`${__dirname}/public`)).use(cors());
 
 app.get('/auth', (_, res) => {
   const query = {
     response_type: 'code',
-    scope: 'playlist-modify-public playlist-read-public playlist-read-private',
+    scope:
+      'playlist-modify-public playlist-read-collaborative playlist-read-private',
     client_id: process.env.SPOTIFY_CLIENT_ID,
     redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
     state: process.env.SPOTIFY_STATE,
@@ -32,13 +52,7 @@ app.get('/callback', (req, res) => {
   if (state === null || state !== process.env.SPOTIFY_STATE) {
     res.redirect(`/#${querystring.stringify({ error: 'state_mismatch' })}`);
   } else {
-    API.authorize(code, (response) => response.json()).then((data) => {
-      API.refresh(data.refresh_token, (refreshed) => refreshed.json()).then(
-        (refreshData) => {
-          console.log(refreshData);
-        },
-      );
-    });
+    authFlow(code, res);
   }
 });
 

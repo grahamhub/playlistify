@@ -4,7 +4,8 @@
   "description": "A Discord bot for managing Spotify playlists",
   "main": "app.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "auth": "node auth/auth.js"
   },
   "repository": {
     "type": "git",
@@ -24,8 +25,10 @@
     "prettier": "2.2.1"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "discord.js": "^12.5.2",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "node-fetch": "^2.6.1",
     "sqlite3": "^5.0.2"
   }

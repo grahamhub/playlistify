@@ -6,12 +6,21 @@ class PlaylistManager {
     this.db = new Database();
   }
 
+  static async jsonify(res) {
+    return res.json();
+  }
+
   static parse(res) {
-    if (res.ok) {
-      return res.body || res.status;
+    if (res.type === 'playlist') {
+      return {
+        id: res.id,
+        type: res.type,
+        name: res.name,
+        description: res.description,
+      };
     }
 
-    return { error: res.body.error };
+    return { error: res.error };
   }
 
   static extractID(url) {
@@ -24,14 +33,20 @@ class PlaylistManager {
     return album.items.map((song) => song.uri);
   }
 
-  getSongsFromAlbum(url) {
-    const endpoint = `albums/${this.extractID(url)}/tracks`;
-
-    return API.get(endpoint, this.appToken, this.parse).then(this.extractURIs);
+  static getSongURI(url) {
+    return [`spotify:track:${PlaylistManager.extractID(url)}`];
   }
 
-  getSongURI(url) {
-    return [`spotify:track:${this.extractID(url)}`];
+  async getSongsFromAlbum(url) {
+    const endpoint = `albums/${PlaylistManager.extractID(url)}/tracks`;
+    const current = await this.db.getCurrent();
+    const album = await API.get(
+      endpoint,
+      current.access_token,
+      PlaylistManager.jsonify,
+    );
+
+    return PlaylistManager.extractURIs(album);
   }
 
   async getSongsFromURL(url) {
@@ -40,7 +55,7 @@ class PlaylistManager {
     if (url.includes('album')) {
       songs = await this.getSongsFromAlbum(url);
     } else {
-      songs = this.getSongURI(url);
+      songs = PlaylistManager.getSongURI(url);
     }
 
     return songs;
@@ -52,7 +67,7 @@ class PlaylistManager {
     const day = dateArr.slice(1).join(' ');
     const month = dateArr.filter((_, idx) => idx % 2 !== 0).join(' ');
 
-    const current = this.db.getCurrent();
+    const current = await this.db.getCurrent();
     const endpoint = `users/${current.user}/playlists`;
     const body = {
       name: fresh ? month : day,
@@ -63,23 +78,31 @@ class PlaylistManager {
 
     const playlist = await API.post(
       endpoint,
-      body,
       current.access_token,
-      this.parse,
+      body,
+      PlaylistManager.jsonify,
     );
 
-    return playlist;
+    const parsed = PlaylistManager.parse(playlist);
+
+    if (fresh) {
+      await this.db.setFresh(parsed.id);
+    } else {
+      await this.db.setWeekly(parsed.id);
+    }
+
+    return parsed;
   }
 
   async updateCurrent(details, fresh = false) {
-    const current = this.db.getCurrent();
+    const current = await this.db.getCurrent();
     const playlist = fresh ? current.fresh : current.weekly;
 
     const status = await API.put(
       `playlists/${playlist}`,
-      details,
       current.access_token,
-      this.parse,
+      details,
+      (res) => res.status,
     );
 
     return status;
@@ -87,7 +110,7 @@ class PlaylistManager {
 
   async addToCurrent(url, fresh = false) {
     const songs = await this.getSongsFromURL(url);
-    const current = this.db.getCurrent();
+    const current = await this.db.getCurrent();
     const playlist = fresh ? current.fresh : current.weekly;
     const endpoint = `playlists/${playlist}/tracks`;
     const body = {
@@ -96,9 +119,9 @@ class PlaylistManager {
 
     const snapshot = await API.post(
       endpoint,
-      body,
       current.access_token,
-      this.parse,
+      body,
+      PlaylistManager.jsonify,
     );
 
     return snapshot;

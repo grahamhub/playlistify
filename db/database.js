@@ -1,100 +1,84 @@
+/* eslint-disable function-paren-newline */
+/* eslint-disable implicit-arrow-linebreak */
 const sqlite3 = require('sqlite3').verbose();
-const util = require('util');
 const logger = require('../exceptions/logger');
 
 class Database {
   constructor(dbName = process.env.DATABASE) {
-    this.db = new sqlite3.Database(dbName);
-    this.db.run(
-      'CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, access_token, refresh_token)',
-    );
-    this.promisify();
+    this.db = new sqlite3.Database(`./db/${dbName}`);
+  }
+
+  run(query, params = []) {
+    return new Promise((resolve, reject) => {
+      this.db.run(query, params, function cb(err) {
+        if (err) {
+          logger.log(err, 'Database');
+          reject(err);
+        } else {
+          resolve({ value: this.changes });
+        }
+      });
+    });
+  }
+
+  get(query, params = []) {
+    return new Promise((resolve, reject) => {
+      this.db.get(query, params, (err, result) => {
+        if (err) {
+          logger.log(err, 'Database');
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
   }
 
   static updateSql(col) {
-    return `UPDATE CURRENT SET ${col} = ? WHERE user = ?`;
+    return `UPDATE current SET ${col} = ? WHERE rowid = 1`;
   }
 
-  promisify() {
-    this.db.get = util.promisify(this.db.get);
-    this.db.run = util.promisify(this.db.run);
+  clear() {
+    return this.run('DROP TABLE IF EXISTS current');
   }
 
-  async exec(col, val) {
-    const previous = this.getCurrent();
-
-    const cb = (err) => {
-      if (err) {
-        logger.log(err, 'Database');
-      }
-
-      return this.changes;
-    };
-
-    const changes = await this.db.run(
-      Database.updateSql(col),
-      [val, previous.user],
-      cb,
+  init() {
+    return this.run(
+      'CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, access_token, refresh_token)',
     );
-
-    return !!changes;
   }
 
-  async initCurrent() {
-    const current = this.getCurrent();
-    const isEmpty = Object.keys(current).length === 0;
+  initCurrent() {
     const user = process.env.SPOTIFY_CLIENT_ID;
-    let initialized = isEmpty;
 
-    const cb = (err) => {
-      if (err) {
-        logger.log(err, 'Database');
-      }
-
-      return true;
-    };
-
-    if (isEmpty) {
-      initialized = await this.db.run(
-        "INSERT INTO current (user, weekly, fresh, access_token, refresh_token) VALUES (?, '', '', '', '')",
-        [user],
-        cb,
-      );
-    }
-
-    return initialized;
+    return this.run(
+      "INSERT INTO current (user, weekly, fresh, access_token, refresh_token) VALUES (?, '', '', '', '')",
+      [user],
+    );
   }
 
-  async getCurrent() {
-    const cb = (err, row) => {
-      if (err) {
-        logger.log(err, 'Database');
-      }
-
-      return row;
-    };
-
-    const test = await this.db.get('SELECT * FROM current', cb);
-
-    return test || {};
+  getCurrent() {
+    return this.get('SELECT * FROM current');
   }
 
-  setWeekly(playlistId) {
-    return this.exec('weekly', playlistId);
+  async setWeekly(playlistId) {
+    return this.run(Database.updateSql('weekly'), [playlistId]);
   }
 
-  setFresh(playlistId) {
-    return this.exec('fresh', playlistId);
+  async setFresh(playlistId) {
+    return this.run(Database.updateSql('fresh'), [playlistId]);
   }
 
-  setUser(userId) {
-    return this.exec('user', userId);
+  async setUser(userId) {
+    return this.run(Database.updateSql('user'), [userId]);
   }
 
-  setTokens(refreshToken, accessToken) {
-    const refreshed = this.exec('refresh_token', refreshToken);
-    const accessed = this.exec('access_token', accessToken);
-    return refreshed && accessed;
+  async setRefresh(token) {
+    return this.run(Database.updateSql('refresh_token'), [token]);
+  }
+
+  async setAccess(token) {
+    return this.run(Database.updateSql('access_token'), [token]);
   }
 }
 

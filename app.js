@@ -18,35 +18,43 @@ const addSong = async function addSongToPlaylist(url, isFresh = false) {
   }
 };
 
-const getPlaylist = function getCurrentPlaylist(type) {
-  let playlist = db.getCurrent()[type];
+const getPlaylist = async function getCurrentPlaylist(type) {
+  const playlist = await db.getCurrent();
+  const which = playlist[type];
+  let msg;
 
-  if (!playlist) playlist = 'Could not fetch playlist';
+  if (!playlist) {
+    msg = 'Could not fetch playlist';
+  } else {
+    msg = `Here you go: https://open.spotify.com/playlist/${which}`;
+  }
 
-  client.messenger.send(playlist);
+  client.messenger.send(msg);
 };
 
-client.on('message', (message) => {
-  const cmd = client.parseCommand(message);
+client.on('message', async (message) => {
+  client.messenger.bindChannel(message.channel);
+
+  const cmd = Client.parseCommand(message);
 
   if (!cmd) return;
 
   switch (cmd.command) {
-    case 'help':
+    case 'helpme':
       client.messenger.sendHelp();
       break;
     case 'weekly':
-      if (cmd.args) {
-        addSong(cmd.args[0]);
+      if (cmd.args.length) {
+        await addSong(cmd.args[0]);
       } else {
-        getPlaylist(cmd.command);
+        await getPlaylist(cmd.command);
       }
       break;
     case 'fresh':
-      if (cmd.args) {
-        addSong(cmd.args[0], true);
+      if (cmd.args.length) {
+        await addSong(cmd.args[0], true);
       } else {
-        getPlaylist(cmd.command);
+        await getPlaylist(cmd.command);
       }
       break;
     default:

@@ -52,7 +52,7 @@ class PlaylistManager {
     const day = dateArr.slice(1).join(' ');
     const month = dateArr.filter((_, idx) => idx % 2 !== 0).join(' ');
 
-    const current = this.db.getCurrent();
+    const current = await this.db.getCurrent();
     const endpoint = `users/${current.user}/playlists`;
     const body = {
       name: fresh ? month : day,
@@ -72,7 +72,7 @@ class PlaylistManager {
   }
 
   async updateCurrent(details, fresh = false) {
-    const current = this.db.getCurrent();
+    const current = await this.db.getCurrent();
     const playlist = fresh ? current.fresh : current.weekly;
 
     const status = await API.put(
@@ -87,7 +87,7 @@ class PlaylistManager {
 
   async addToCurrent(url, fresh = false) {
     const songs = await this.getSongsFromURL(url);
-    const current = this.db.getCurrent();
+    const current = await this.db.getCurrent();
     const playlist = fresh ? current.fresh : current.weekly;
     const endpoint = `playlists/${playlist}/tracks`;
     const body = {

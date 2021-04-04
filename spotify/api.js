@@ -36,16 +36,31 @@ class API {
   }
 
   static withForm(method) {
-    return function requestWithForm(endpoint, body, callback) {
-      body.client_id = process.env.SPOTIFY_CLIENT_ID;
-      body.client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+    return function requestWithForm(
+      endpoint,
+      token,
+      body,
+      callback,
+      json = true,
+    ) {
+      if (!json) {
+        body.client_id = process.env.SPOTIFY_CLIENT_ID;
+        body.client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+      }
+
       const opts = {
         method,
+        body: json ? JSON.stringify(body) : API.encodeJson(body),
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': json
+            ? 'application/json'
+            : 'application/x-www-form-urlencoded',
         },
-        body: API.encodeJson(body),
       };
+
+      if (json) {
+        opts.headers.Authorization = `Bearer ${token}`;
+      }
 
       return API.request(endpoint, opts, callback);
     };
@@ -55,23 +70,23 @@ class API {
     const opts = {
       method: 'GET',
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
       },
     };
 
     return API.request(endpoint, opts, callback);
   }
 
-  static post(endpoint, body, callback) {
+  static post(endpoint, token, body, callback) {
     const postForm = API.withForm('POST');
 
-    return postForm(endpoint, body, callback);
+    return postForm(endpoint, token, body, callback);
   }
 
-  static put(endpoint, body, callback) {
+  static put(endpoint, token, body, callback) {
     const putForm = API.withForm('PUT');
 
-    return putForm(endpoint, body, callback);
+    return putForm(endpoint, token, body, callback);
   }
 
   static authorize(code, callback) {
@@ -82,7 +97,13 @@ class API {
       redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
     };
 
-    return postForm('https://accounts.spotify.com/api/token', body, callback);
+    return postForm(
+      'https://accounts.spotify.com/api/token',
+      null,
+      body,
+      callback,
+      false,
+    );
   }
 
   static refresh(refreshToken, callback) {
@@ -92,7 +113,13 @@ class API {
       refresh_token: refreshToken,
     };
 
-    return postForm('https://accounts.spotify.com/api/token', body, callback);
+    return postForm(
+      'https://accounts.spotify.com/api/token',
+      null,
+      body,
+      callback,
+      false,
+    );
   }
 }
 

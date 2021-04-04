@@ -2,8 +2,36 @@ const { expect } = require('chai');
 const Database = require('../db/database');
 const API = require('../spotify/api');
 const PlaylistManager = require('../spotify/playlistmgr');
+const logger = require('../exceptions/logger');
+const { promisify } = require('util');
+const readdir = promisify(require('fs').readdir);
 const dummyAlbum = require('./album');
 const dotenv = require('dotenv').config();
+
+// LOGGER
+describe('Logger', function () {
+  describe('#log()', function () {
+    const testError = new Error('Test Error');
+
+    const getFiles = async () => {
+      const files = await readdir(process.env.LOGPATH);
+
+      console.log(files);
+
+      return files;
+    };
+
+    it('should create new log file', async function () {
+      const before = await getFiles();
+
+      await logger.log(testError, 'Testing');
+
+      const after = await getFiles();
+
+      expect(after.length - before.length).to.equal(1);
+    });
+  });
+});
 
 // DATABASE
 describe('Database', function () {

@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha --slow 300",
-    "auth": "node auth/auth.js"
+    "auth": "node auth/auth.js",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",

@@ -11,7 +11,9 @@ class Client extends Discord.Client {
 
   static shouldHandle(message) {
     return (
-      message.channel === process.env.CHANNEL && message.content.startsWith('!')
+      // eslint-disable-next-line operator-linebreak
+      message.channel.id === process.env.CHANNEL &&
+      message.content.startsWith('!')
     );
   }
 
@@ -31,9 +33,9 @@ class Client extends Discord.Client {
     this.readyState = 'ready';
   }
 
-  parseCommand(message) {
-    if (this.shouldHandle(message)) {
-      return this.buildCommand(message.content);
+  static parseCommand(message) {
+    if (Client.shouldHandle(message)) {
+      return Client.buildCommand(message.content);
     }
 
     return null;

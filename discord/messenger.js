@@ -3,6 +3,10 @@ class Messenger {
     this.channel = channel;
   }
 
+  bindChannel(channel) {
+    this.channel = channel;
+  }
+
   sendHelp() {
     const help = `Command structure:
 - !<command> <url>
@@ -10,7 +14,7 @@ class Messenger {
 Available commands:
 - weekly: accepts album or track URLs (or no argument for the link)
 - fresh: accepts only track URLs (or no argument for the link)
-- help: responds with this message \u{1f917}
+- helpme: responds with this message \u{1f917}
 
 To get a proper URL:
 - Open your Spotify client

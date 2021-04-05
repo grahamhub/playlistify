@@ -36,13 +36,13 @@ class API {
   }
 
   static withForm(method) {
-    return function requestWithForm(
+    return function requestWithForm({
       endpoint,
-      token,
+      token = null,
       body,
       callback,
       json = true,
-    ) {
+    }) {
       if (!json) {
         body.client_id = process.env.SPOTIFY_CLIENT_ID;
         body.client_secret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -77,16 +77,27 @@ class API {
     return API.request(endpoint, opts, callback);
   }
 
+  // { endpoint, token, body, callback, json = true }
   static post(endpoint, token, body, callback) {
     const postForm = API.withForm('POST');
 
-    return postForm(endpoint, token, body, callback);
+    return postForm({
+      endpoint,
+      token,
+      body,
+      callback,
+    });
   }
 
   static put(endpoint, token, body, callback) {
     const putForm = API.withForm('PUT');
 
-    return putForm(endpoint, token, body, callback);
+    return putForm({
+      endpoint,
+      token,
+      body,
+      callback,
+    });
   }
 
   static authorize(code, callback) {
@@ -97,13 +108,12 @@ class API {
       redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
     };
 
-    return postForm(
-      'https://accounts.spotify.com/api/token',
-      null,
+    return postForm({
+      endpoint: 'https://accounts.spotify.com/api/token',
       body,
       callback,
-      false,
-    );
+      json: false,
+    });
   }
 
   static refresh(refreshToken, callback) {
@@ -113,13 +123,12 @@ class API {
       refresh_token: refreshToken,
     };
 
-    return postForm(
-      'https://accounts.spotify.com/api/token',
-      null,
+    return postForm({
+      endpoint: 'https://accounts.spotify.com/api/token',
       body,
       callback,
-      false,
-    );
+      json: false,
+    });
   }
 }
 

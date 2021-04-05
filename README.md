@@ -55,3 +55,7 @@ If you've gotten this far, I trust you enough to research cron tasks. For playli
 # and you're done!
 
 You should be able to issue commands in the configured channel for playlistify. If you don't know what to tell it to do, the help command is `!helpme`.
+
+# Contributing
+
+Feel free to open any bug fix/feature PR! Just make sure you're doing your work in an aptly named branch (i.e. `feature-name` or `bug-fix-reference`)

@@ -38,43 +38,43 @@ class Database {
     return `UPDATE current SET ${col} = ? WHERE rowid = 1`;
   }
 
-  async clear() {
+  clear() {
     return this.run('DROP TABLE IF EXISTS current');
   }
 
-  async init() {
+  init() {
     return this.run(
       'CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, access_token, refresh_token)',
     );
   }
 
-  async initCurrent() {
+  initCurrent() {
     const user = process.env.SPOTIFY_CLIENT_ID;
 
     return this.run('INSERT INTO current (user) VALUES (?)', [user]);
   }
 
-  async getCurrent() {
+  getCurrent() {
     return this.get('SELECT * FROM current');
   }
 
-  async setWeekly(playlistId) {
+  setWeekly(playlistId) {
     return this.run(Database.updateSql('weekly'), [playlistId]);
   }
 
-  async setFresh(playlistId) {
+  setFresh(playlistId) {
     return this.run(Database.updateSql('fresh'), [playlistId]);
   }
 
-  async setUser(userId) {
+  setUser(userId) {
     return this.run(Database.updateSql('user'), [userId]);
   }
 
-  async setRefresh(token) {
+  setRefresh(token) {
     return this.run(Database.updateSql('refresh_token'), [token]);
   }
 
-  async setAccess(token) {
+  setAccess(token) {
     return this.run(Database.updateSql('access_token'), [token]);
   }
 }

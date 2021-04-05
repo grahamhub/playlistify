@@ -1,9 +1,5 @@
 class Messenger {
-  constructor(channel) {
-    this.channel = channel;
-  }
-
-  bindChannel(channel) {
+  setChannel(channel) {
     this.channel = channel;
   }
 

@@ -7,7 +7,9 @@
     "test": "mocha --slow 300",
     "auth": "node auth/auth.js",
     "start": "node app.js",
-    "cron": "node cron/refresh.js"
+    "refresh": "node cron/refresh.js",
+    "weekly": "node cron/create.js weekly",
+    "monthly": "node cron/create.js monthly"
   },
   "repository": {
     "type": "git",

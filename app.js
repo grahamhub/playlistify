@@ -6,6 +6,12 @@ const db = new Database();
 const client = new Client();
 const playlists = new PlaylistManager();
 
+const ERRORS = {
+  invalidArgs(type) {
+    return `this command takes a maximum of one argument, and it should be a valid Spotify ${type} link.`;
+  },
+};
+
 const addSong = async function addSongToPlaylist(url, isFresh = false) {
   const songAdded = await playlists.addToCurrent(url, isFresh);
 
@@ -33,8 +39,6 @@ const getPlaylist = async function getCurrentPlaylist(type) {
 };
 
 client.on('message', async (message) => {
-  client.messenger.bindChannel(message.channel);
-
   const cmd = Client.parseCommand(message);
 
   if (!cmd) return;
@@ -44,15 +48,21 @@ client.on('message', async (message) => {
       client.messenger.sendHelp();
       break;
     case 'weekly':
-      if (cmd.args.length) {
+      if (Client.invalidArgs(cmd.args)) {
+        client.messenger.sendError(ERRORS.invalidArgs('album/song'));
+      } else if (cmd.args.length) {
         await addSong(cmd.args[0]);
       } else {
         await getPlaylist(cmd.command);
       }
       break;
     case 'fresh':
-      if (cmd.args.length) {
+      if (Client.invalidArgs(cmd.args)) {
+        client.messenger.sendError(ERRORS.invalidArgs('song'));
+      } else if (cmd.args.length && cmd.args[0].includes('track')) {
         await addSong(cmd.args[0], true);
+      } else if (cmd.args.length) {
+        client.messenger.sendError('this playlist only accepts songs.');
       } else {
         await getPlaylist(cmd.command);
       }

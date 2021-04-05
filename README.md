@@ -32,11 +32,15 @@ CHANNEL=<discord channel id that you want playlistify to listen to>
 LOGPATH=<path where you want logs stored>
 ```
 
+There are also certain details about the playlists that you can change, i.e. lines 75-76 in `playlistmgr.js` for the description. So far that's the only "unique" to my situation thing that you'd have to change.
+
 # Testing
 
 After configuring and authorizing your local playlistify, you can run `npm test` to make sure everything is functional. This tests everything but the Discord client.
 
 This _will_ create test playlists on whichever Spotify account you authorized and update the prod DB to reflect this. Unfortunately the Spotify API does not allow for playlist deletion, sorry :/
+
+Someday soon (?) I might go back and configure the test so it at least doesn't update the DB, but since that's handled by `PlaylistManager` which uses the prod DB it currently does change it.
 
 # Cron tasks
 

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha --slow 300",
     "auth": "node auth/auth.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "cron": "node cron/refresh.js"
   },
   "repository": {
     "type": "git",

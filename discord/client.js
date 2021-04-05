@@ -4,9 +4,13 @@ const Messenger = require('./messenger');
 class Client extends Discord.Client {
   constructor() {
     super();
-    this.messenger = new Messenger(process.env.CHANNEL);
-    this.readyState = 'not ready';
+    this.messenger = new Messenger();
+    this.readyState = false;
     this.on('ready', this.setState);
+  }
+
+  static invalidArgs(args) {
+    return args.length > 1 || !args[0].includes('spotify');
   }
 
   static shouldHandle(message) {
@@ -29,8 +33,16 @@ class Client extends Discord.Client {
     };
   }
 
-  setState() {
-    this.readyState = 'ready';
+  async bindChannel(channelId = process.env.CHANNEL) {
+    const channel = await this.channels.fetch(String(channelId));
+
+    this.messenger.setChannel(channel);
+  }
+
+  async setState() {
+    await this.bindChannel();
+
+    this.readyState = true;
   }
 
   static parseCommand(message) {

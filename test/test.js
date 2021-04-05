@@ -16,8 +16,6 @@ describe('Logger', function () {
     const getFiles = async () => {
       const files = await readdir(process.env.LOGPATH);
 
-      console.log(files);
-
       return files;
     };
 

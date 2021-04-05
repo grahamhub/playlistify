@@ -38,26 +38,23 @@ class Database {
     return `UPDATE current SET ${col} = ? WHERE rowid = 1`;
   }
 
-  clear() {
+  async clear() {
     return this.run('DROP TABLE IF EXISTS current');
   }
 
-  init() {
+  async init() {
     return this.run(
       'CREATE TABLE IF NOT EXISTS current (user PRIMARY KEY, weekly, fresh, access_token, refresh_token)',
     );
   }
 
-  initCurrent() {
+  async initCurrent() {
     const user = process.env.SPOTIFY_CLIENT_ID;
 
-    return this.run(
-      "INSERT INTO current (user, weekly, fresh, access_token, refresh_token) VALUES (?, '', '', '', '')",
-      [user],
-    );
+    return this.run('INSERT INTO current (user) VALUES (?)', [user]);
   }
 
-  getCurrent() {
+  async getCurrent() {
     return this.get('SELECT * FROM current');
   }
 

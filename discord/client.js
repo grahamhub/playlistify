@@ -10,7 +10,9 @@ class Client extends Discord.Client {
   }
 
   static invalidArgs(args) {
-    return args.length > 1 || !args[0].includes('spotify');
+    if (args.length) return args.length > 1 || !args[0].includes('spotify');
+
+    return false;
   }
 
   static shouldHandle(message) {
